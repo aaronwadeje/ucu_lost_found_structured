@@ -1,25 +1,6 @@
-
-
-
 # UCU Campus Lost & Found
 
-A responsive web application for reporting, searching and reclaiming lost items on the UCU campus.
-<<<<<<< HEAD
-Built for  Web and Mobile Applications Development (Advent 2026).
-
-- Students report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
-- Administrators review claims, approve or reject them with a reason, confirm when an item has been returned, manage listings, and create other administrator accounts.
-
-Private identifying details and claim evidence are protected on the backend. They are never included in public responses.
-
-- Deployed application: _add URL here_
-- Repository: https://github.com/aaronwadeje/ucu_lost_found_structured
-- Final commit ID: _ NOT GOT YET_
-
----
-
- Table of contents
-=======
+A responsive web application for reporting, searching, and reclaiming lost items on the Uganda Christian University (UCU) campus.  
 Built for **CSC1202 – Web and Mobile Applications Development** (Advent 2026).
 
 - **Students** report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
@@ -34,49 +15,39 @@ Private identifying details and claim evidence are protected **on the backend**.
 ---
 
 ## Table of contents
->>>>>>> fix-login-aaron
 
 1. [Tech stack](#tech-stack)
 2. [Project structure](#project-structure)
-3. [Prerequisites](#prerequisites)
-4. [Setup](#setup)
-5. [Administrator accounts](#administrator-accounts)
-6. [Production build](#production-build)
-7. [How the claim workflow works](#how-the-claim-workflow-works)
-8. [API reference](#api-reference)
-9. [Frontend folder map](#frontend-folder-map)
-10. [Security notes](#security-notes)
-11. [Troubleshooting](#troubleshooting)
-12. [Acknowledgements](#acknowledgements)
-13. [Authors](#authors)
+3. [Database architecture & file alignment](#database-architecture--file-alignment)
+4. [Prerequisites](#prerequisites)
+5. [Setup](#setup)
+6. [Administrator accounts](#administrator-accounts)
+7. [Production build](#production-build)
+8. [How the claim workflow works](#how-the-claim-workflow-works)
+9. [API reference](#api-reference)
+10. [Frontend folder map](#frontend-folder-map)
+11. [Security notes](#security-notes)
+12. [Troubleshooting](#troubleshooting)
+13. [Acknowledgements](#acknowledgements)
+14. [Authors](#authors)
 
-<<<<<<< HEAD
-
-
- Tech stack
-=======
 ---
 
 ## Tech stack
->>>>>>> fix-login-aaron
 
 | Layer    | Technology                                                                     |
 |----------|--------------------------------------------------------------------------------|
 | Frontend | React 18, React Router 6, Vite 5                                               |
 | Backend  | Node.js, Express 4                                                             |
-| Database | MySQL                                                                          |
+| Database | MySQL 8                                                                        |
 | Security | bcrypt password hashing (`bcryptjs`), JWT sessions, token revocation on logout |
 | Uploads  | Multer (images only, 5 MB limit)                                               |
 
-<<<<<<< HEAD
-Project structure
+---
 
-
-=======
 ## Project structure
 
-```
->>>>>>> fix-login-aaron
+```text
 ucu_lost_found_structured/
 ├── backend/
 │   ├── server.js          # Express app and all API routes
@@ -91,6 +62,34 @@ ucu_lost_found_structured/
     ├── vite.config.js     # Dev server + proxy to the backend
     └── package.json
 ```
+
+---
+
+## Database architecture & file alignment
+
+The backend database setup files work together to initialize the relational schema and populate initial test accounts so the application can run immediately:
+
+### 1. `backend/schema.sql` (Database Blueprint)
+This SQL script defines the core database (`ucu_lost_found`) and establishes the relational rules and constraints between tables:
+- **`users`**: Stores student and administrator accounts. Passwords are stored strictly as secure bcrypt hashes (`VARCHAR(255)`), and `role` (`student` or `admin`) governs backend access permissions.
+- **`items`**: Tracks every lost or found report. It links back to `users` via `reporter_id` and includes a `private_details` column (hidden from public API responses) used to verify true ownership during a claim.
+- **`claims`**: Acts as a bridge between `users` and `items`. When a student claims an item, they submit `evidence`. A `UNIQUE` constraint (`one_claim_per_user` on `item_id, claimant_id`) prevents a user from submitting duplicate claims on the same item.
+- **`revoked_tokens`**: Manages authentication security by blacklisting JWT IDs (`jti`) upon user logout so logged-out tokens cannot be reused.
+
+### 2. `backend/seed.js` (Data Initializer)
+Once `schema.sql` creates the empty tables, `seed.js` populates the `users` table with default demo student accounts:
+- **Schema Alignment**: `seed.js` uses `bcryptjs` to hash the default test password (`password123`) before inserting records into the `users` table via the shared database connection pool (`./db.js`).
+- **Idempotency**: Uses `ON DUPLICATE KEY UPDATE`, allowing the seed script to be run multiple times safely without crashing due to duplicate email errors.
+
+### 3. End-to-End Data Lifecycle
+1. **Initialization**: `schema.sql` builds the empty database tables and enforces foreign key constraints (ensuring an item or claim cannot exist without a valid user).
+2. **Seeding & Provisioning**: `create-admin.js` provisions the initial administrator from `.env`, while `seed.js` optionally injects realistic UCU student accounts for local testing.
+3. **Runtime Flow**:
+   - **Authentication**: Users log in against the `users` table; logging out writes their token ID to `revoked_tokens`.
+   - **Reporting**: A user inserts a lost/found record into `items`, placing sensitive verification details in `private_details`.
+   - **Claiming & Verification**: A claimant submits `evidence` into `claims`. Administrators compare `evidence` against `items.private_details`, update the claim status (`approved`/`rejected`), and mark the item `returned`.
+
+---
 
 ## Prerequisites
 
@@ -109,32 +108,22 @@ git clone https://github.com/aaronwadeje/ucu_lost_found_structured.git
 cd ucu_lost_found_structured
 ```
 
-<<<<<<< HEAD
- 2. Create the database
-=======
 ### 2. Create the database
->>>>>>> fix-login-aaron
 
-From the `backend` folder, run the setup script. This works in Command Prompt, PowerShell and Git Bash:
+From the `backend` folder, run the setup script. This works in Command Prompt, PowerShell, and Git Bash:
 
 ```bash
 cd backend
 mysql -u root -p -e "source schema.sql"
 ```
 
-Enter your MySQL password when asked. This creates the `ucu_lost_found` database and its tables
-(`users`, `items`, `claims`, `revoked_tokens`).
+Enter your MySQL password when asked. This creates the `ucu_lost_found` database and its tables (`users`, `items`, `claims`, `revoked_tokens`).
 
 > Prefer a GUI? Open `schema.sql` in MySQL Workbench and run the whole script.
 
-<<<<<<< HEAD
-3. Configure the backend (`.env` file)
-=======
 ### 3. Configure the backend (`.env` file)
->>>>>>> fix-login-aaron
 
-The `.env` file holds your private settings. **It must never be committed to Git.**
-It is already listed in `.gitignore`.
+The `.env` file holds your private settings. **It must never be committed to Git.** It is already listed in `.gitignore`.
 
 1. In the `backend` folder, copy the template to a new file named `.env`:
 
@@ -181,14 +170,9 @@ Generate a strong `JWT_SECRET` with:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-> If `JWT_SECRET` is missing, the server falls back to an insecure development default.
-> Always set your own value.
+> If `JWT_SECRET` is missing, the server falls back to an insecure development default. Always set your own value.
 
-<<<<<<< HEAD
- 4. Install backend dependencies and create the administrator
-=======
 ### 4. Install backend dependencies and create the administrator
->>>>>>> fix-login-aaron
 
 ```bash
 npm install
@@ -197,65 +181,28 @@ npm run admin:create
 
 You should see: `Administrator account provisioned for <your email>.`
 
-This reads `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `.env`, hashes the password with bcrypt, and stores the account with the `admin` role.
+This reads `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` from `.env`, hashes the password with bcrypt, and stores the account with the `admin` role.
 
 Notes:
 - If you see an error such as *"ADMIN_PASSWORD must be at least 12 characters"*, fix the value in `.env` and run the command again.
 - Running the command again for the same email **resets that administrator's password** to the current `ADMIN_PASSWORD`.
-- After the account exists, you can delete the `ADMIN_PASSWORD` line from `.env`. Change your password later from the admin dashboard.
+- After the account exists, you can delete the `ADMIN_PASSWORD` line from `.env` and change your password later from the admin dashboard.
 
-<<<<<<< HEAD
- 5. (Optional) Add fictional sample students
-
-bash
-npm run seed
-
-=======
 ### 5. (Optional) Add fictional sample students
 
 ```bash
 npm run seed
 ```
->>>>>>> fix-login-aaron
 
 This creates two fictional student accounts for testing. The password for both is `password123`.
 
-| Name          | Email                       | Role    |
-|---------------|-----------------------------|---------|
-| Namusoke Ruth | namusoke@students.ucu.ac.ug | student |
-| Okello James  | okello@students.ucu.ac.ug   | student |
+| Name          | Email                       | Role    | Password    |
+|---------------|-----------------------------|---------|-------------|
+| Namusoke Ruth | namusoke@students.ucu.ac.ug | student | password123 |
+| Okello James  | okello@students.ucu.ac.ug   | student | password123 |
 
 > Never run `npm run seed` against a production database, and never use `password123` on a deployed system.
 
-<<<<<<< HEAD
-6. Start the backend
-
-bash
-npm start
-
-
-The API runs at **http://localhost:5000**. Keep this terminal open.
-
- 7. Start the frontend
-
-Open a second terminal:
-
-bash
-cd frontend
-npm install
-npm run dev
-
-
-Open **http://localhost:5173** in your browser. In development, Vite forwards `/api` and `/uploads` requests to the backend automatically (configured in `vite.config.js`).
-
- 8. Sign in as the administrator
-
-Use the **Admin sign in** page with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you set in step 3.
-
-
-
- Administrator accounts
-=======
 ### 6. Start the backend
 
 ```bash
@@ -283,70 +230,46 @@ Use the **Admin sign in** page with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you s
 ---
 
 ## Administrator accounts
->>>>>>> fix-login-aaron
 
 - Public registration **always** creates a **student** account.
 - The **first** administrator is provisioned from the command line (`npm run admin:create`, see [Setup step 4](#4-install-backend-dependencies-and-create-the-administrator)).
-- An existing administrator creates each additional admin from the protected **Administrators** section of the dashboard, giving each their own name, email and unique initial password (minimum 12 characters). Share the initial password securely.
-- Each administrator can update their own name, email and password from the dashboard. Changing profile details requires the current password.
+- An existing administrator creates each additional admin from the protected **Administrators** section of the dashboard, giving each their own name, email, and unique initial password (minimum 12 characters). Share the initial password securely.
+- Each administrator can update their own name, email, and password from the dashboard. Changing profile details requires the current password.
 
-<<<<<<< HEAD
- Production build
+---
 
-bash
-cd frontend
-npm run build
-
-=======
 ## Production build
 
 ```bash
 cd frontend
 npm run build
 ```
->>>>>>> fix-login-aaron
 
 The build is written to `frontend/dist`. For a deployed build, set `VITE_API_URL` to your backend's public API URL (for example `https://your-backend.example.com/api`) before building. See `frontend/.env.example`.
 
 ---
 
-<<<<<<< HEAD
- How the claim workflow works
-=======
 ## How the claim workflow works
->>>>>>> fix-login-aaron
 
 1. A student reports an item as **lost** or **found**. For found items, private identifying details go in a separate field visible only to the reporter and administrator.
-2. Anyone can search and filter listings by keyword, category, location, date and type. Each listing shows whether it is **open** or **returned**.
+2. Anyone can search and filter listings by keyword, category, location, date, and type. Each listing shows whether it is **open** or **returned**.
 3. A logged-in student claims a found item by privately explaining why it is theirs. Students cannot claim items they reported, items already returned, or the same item twice.
 4. The administrator **approves or rejects** the claim and records a reason. Only one claim can be approved per item.
 5. After the owner collects the item, the administrator marks it **returned** (only possible after an approved claim). No further claims are accepted after that.
 
-<<<<<<< HEAD
-Statuses
-=======
 **Statuses**
->>>>>>> fix-login-aaron
 
-- Item: `open`, `returned`
-- Claim: `pending`, `approved`, `rejected`
+- **Item**: `open`, `returned`
+- **Claim**: `pending`, `approved`, `rejected`
 
 ---
 
-<<<<<<< HEAD
- API reference
-=======
 ## API reference
->>>>>>> fix-login-aaron
 
-Protected routes expect `Authorization: Bearer <token>`.
+Protected routes expect `Authorization: Bearer <token>`.  
 Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
-<<<<<<< HEAD
-Authentication
-=======
 ### Authentication
->>>>>>> fix-login-aaron
 
 | Method & path             | Access    | Body                      | Returns                           |
 |---------------------------|-----------|---------------------------|-----------------------------------|
@@ -354,51 +277,37 @@ Authentication
 | `POST /api/auth/login`    | Public    | email, password           | `{ token, user }`                 |
 | `POST /api/auth/logout`   | Logged in | –                         | `{ ok:true }` (token is revoked)  |
 
-<<<<<<< HEAD
- Items and claims (students)
-=======
 ### Items and claims (students)
->>>>>>> fix-login-aaron
 
-| Method & path                  | Access    | Body / query                                                                    | Returns                                                                                                                                                      |
-|--------------------------------|-----------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GET /api/items`               | Public    | query: `q`, `type`, `category`, `location`, `date`, `status`                    | Array of public items: id, type, title, category, description, date, location, photo_url, status. **No private details.**                                    |
-| `GET /api/items/:id`           | Public*   | –                                                                               | Public item + `is_owner`. Owner/admin also get `private_details`. A logged-in claimant also gets `my_claim:{id,status,evidence,admin_reason}`.               |
-| `POST /api/items`              | Logged in | multipart: type, title, category, description, date, location, private_details?, photo? | `{ id }`                                                                                                                                              |
-| `PUT /api/items/:id`           | Owner or admin | same as above                                                              | `{ id }`                                                                                                                                                     |
-| `GET /api/my/items`            | Logged in | –                                                                               | Array of your own items                                                                                                                                      |
-| `POST /api/items/:id/claims`   | Logged in | `{ evidence }`                                                                  | Created claim (rejects own item, returned item, duplicate claim)                                                                                             |
-| `GET /api/my/claims`           | Logged in | –                                                                               | Array: id, item_id, item_title, status, admin_reason, created_at                                                                                             |
+| Method & path                  | Access         | Body / query                                                                            | Returns                                                                                                                                                      |
+|--------------------------------|----------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GET /api/items`               | Public         | query: `q`, `type`, `category`, `location`, `date`, `status`                            | Array of public items: id, type, title, category, description, date, location, photo_url, status. **No private details.**                                    |
+| `GET /api/items/:id`           | Public\*       | –                                                                                       | Public item + `is_owner`. Owner/admin also get `private_details`. A logged-in claimant also gets `my_claim:{id,status,evidence,admin_reason}`.               |
+| `POST /api/items`              | Logged in      | multipart: type, title, category, description, date, location, private_details?, photo? | `{ id }`                                                                                                                                                     |
+| `PUT /api/items/:id`           | Owner or admin | same as above                                                                           | `{ id }`                                                                                                                                                     |
+| `GET /api/my/items`            | Logged in      | –                                                                                       | Array of your own items                                                                                                                                      |
+| `POST /api/items/:id/claims`   | Logged in      | `{ evidence }`                                                                          | Created claim (rejects own item, returned item, duplicate claim)                                                                                             |
+| `GET /api/my/claims`           | Logged in      | –                                                                                       | Array: id, item_id, item_title, status, admin_reason, created_at                                                                                             |
 
 \* Private fields are only returned to the item's owner and administrators.
 
-<<<<<<< HEAD
-Administration (admin only)
-=======
 ### Administration (admin only)
->>>>>>> fix-login-aaron
 
-| Method & path                      | Body                                          | Returns                                                                                                                   |
-|------------------------------------|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `GET /api/admin/items`             | –                                             | Array of listings with reporter names                                                                                     |
-| `DELETE /api/admin/items/:id`      | –                                             | Permanently deletes a listing and its claims                                                                              |
-| `GET /api/admin/claims`            | –                                             | Array: id, item_id, item_title, item_status, item_private_details, claimant_name, evidence, status, admin_reason, created_at |
-| `PATCH /api/admin/claims/:id`      | `{ decision:'approved'｜'rejected', reason }` | Updated claim (only one approved claim per item)                                                                          |
-| `POST /api/admin/items/:id/return` | –                                             | Item marked `returned` (only after an approved claim)                                                                     |
-| `GET /api/admin/users`             | –                                             | Administrator account list                                                                                                |
-| `POST /api/admin/users`            | name, email, password                         | Created administrator account                                                                                             |
-| `GET /api/admin/profile`           | –                                             | Current administrator account                                                                                             |
-| `PATCH /api/admin/profile`         | name, email, currentPassword, newPassword?    | Updated current administrator account                                                                                     |
+| Method & path                      | Body                                            | Returns                                                                                                                   |
+|------------------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `GET /api/admin/items`             | –                                               | Array of listings with reporter names                                                                                     |
+| `DELETE /api/admin/items/:id`      | –                                               | Permanently deletes a listing and its claims                                                                              |
+| `GET /api/admin/claims`            | –                                               | Array: id, item_id, item_title, item_status, item_private_details, claimant_name, evidence, status, admin_reason, created_at |
+| `PATCH /api/admin/claims/:id`      | `{ decision:'approved' \| 'rejected', reason }` | Updated claim (only one approved claim per item)                                                                          |
+| `POST /api/admin/items/:id/return` | –                                               | Item marked `returned` (only after an approved claim)                                                                     |
+| `GET /api/admin/users`             | –                                               | Administrator account list                                                                                                |
+| `POST /api/admin/users`            | name, email, password                           | Created administrator account                                                                                             |
+| `GET /api/admin/profile`           | –                                               | Current administrator account                                                                                             |
+| `PATCH /api/admin/profile`         | name, email, currentPassword, newPassword?      | Updated current administrator account                                                                                     |
 
-<<<<<<< HEAD
-
-
- Frontend folder map
-=======
 ---
 
 ## Frontend folder map
->>>>>>> fix-login-aaron
 
 - `src/api.js` – every call to the backend (one place to change URLs)
 - `src/AuthContext.jsx` – login state, token storage, logout
@@ -406,11 +315,9 @@ Administration (admin only)
 - `src/components/` – Navbar, ItemCard, Field, StatusBadge, Feedback (loading/empty/alerts), ProtectedRoute
 - `src/styles.css` – all styling (mobile first)
 
-<<<<<<< HEAD
-Security notes
-=======
+---
+
 ## Security notes
->>>>>>> fix-login-aaron
 
 - Passwords are stored only as bcrypt hashes.
 - Permissions are enforced on the backend; hiding buttons or pages in React is only a convenience.
@@ -419,11 +326,9 @@ Security notes
 - Secrets live in `backend/.env`, which is excluded from Git. Never commit it.
 - Never run `npm run seed` or use `password123` on a deployed system.
 
-<<<<<<< HEAD
- Troubleshooting
-=======
+---
+
 ## Troubleshooting
->>>>>>> fix-login-aaron
 
 | Problem | Fix |
 |---------|-----|
@@ -434,18 +339,12 @@ Security notes
 | Port already in use | Change `PORT` in `backend/.env`, and update the proxy target in `frontend/vite.config.js` to match. |
 | `mysql` is not recognised | Add the MySQL `bin` folder to your PATH, or run `schema.sql` in MySQL Workbench. |
 
-<<<<<<< HEAD
- Acknowledgements
+---
 
-List external code, references and any permitted AI assistance here, as required by the examination instructions.
-
- Authors
-=======
 ## Acknowledgements
 
 _List external code, references and any permitted AI assistance here, as required by the examination instructions._
 
 ## Authors
->>>>>>> fix-login-aaron
 
 _Add team members' names and contributions here._
