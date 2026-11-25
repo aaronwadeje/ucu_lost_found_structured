@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+<<<<<<< HEAD
 // ---------- photo upload ----------
 const upload = multer({
   storage: multer.diskStorage({
@@ -29,6 +30,22 @@ const upload = multer({
     cb(null, /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)),
 });
 
+=======
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(png|jpe?g|webp)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only PNG, JPG or WEBP images allowed.'));
+  }
+});
+
+function photoDataUrl(file) {
+  if (!file) return null;
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+}
+
+>>>>>>> fix-login-aaron
 // ---------- helpers ----------
 const fail = (res, status, message, errors) => res.status(status).json({ message, errors });
 const wrap = (fn) => (req, res) => fn(req, res).catch((e) => {
@@ -37,7 +54,11 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((e) => {
 });
 
 async function readUser(req) {
+<<<<<<< HEAD
   const h = req.headers.authorization || '';
+=======
+   h = req.headers.authorization || '';
+>>>>>>> fix-login-aaron
   if (!h.startsWith('Bearer ')) return null;
   try {
     const p = jwt.verify(h.slice(7), SECRET);
@@ -144,7 +165,11 @@ app.post('/api/items', requireUser, upload.single('photo'), wrap(async (req, res
     `INSERT INTO items (reporter_id,type,title,category,description,date,location,private_details,photo_url)
      VALUES (?,?,?,?,?,?,?,?,?)`,
     [req.user.id, f.type, f.title.trim(), f.category, f.description.trim(), f.date, f.location,
+<<<<<<< HEAD
      f.type === 'found' ? f.private_details.trim() : '', req.file ? `/uploads/${req.file.filename}` : '']);
+=======
+     f.type === 'found' ? f.private_details.trim() : '',  photoDataUrl(req.file) || '']);
+>>>>>>> fix-login-aaron
   res.status(201).json({ id: r.insertId });
 }));
 
@@ -161,7 +186,11 @@ app.put('/api/items/:id', requireUser, upload.single('photo'), wrap(async (req, 
     `UPDATE items SET title=?,category=?,description=?,date=?,location=?,private_details=?,photo_url=? WHERE id=?`,
     [f.title.trim(), f.category, f.description.trim(), f.date, f.location,
      item.type === 'found' ? f.private_details.trim() : '',
+<<<<<<< HEAD
      req.file ? `/uploads/${req.file.filename}` : item.photo_url, item.id]);
+=======
+     photoDataUrl(req.file) || item.photo_url,item.id]);
+>>>>>>> fix-login-aaron
   res.json({ id: item.id });
 }));
 

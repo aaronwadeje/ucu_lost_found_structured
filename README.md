@@ -4,6 +4,7 @@
 # UCU Campus Lost & Found
 
 A responsive web application for reporting, searching and reclaiming lost items on the UCU campus.
+<<<<<<< HEAD
 Built for  Web and Mobile Applications Development (Advent 2026).
 
 - Students report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
@@ -18,6 +19,22 @@ Private identifying details and claim evidence are protected on the backend. The
 ---
 
  Table of contents
+=======
+Built for **CSC1202 – Web and Mobile Applications Development** (Advent 2026).
+
+- **Students** report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
+- **Administrators** review claims, approve or reject them with a reason, confirm when an item has been returned, manage listings, and create other administrator accounts.
+
+Private identifying details and claim evidence are protected **on the backend**. They are never included in public responses.
+
+- **Deployed application:** _add URL here_
+- **Repository:** https://github.com/aaronwadeje/ucu_lost_found_structured
+- **Final commit ID:** _add here before submission_
+
+---
+
+## Table of contents
+>>>>>>> fix-login-aaron
 
 1. [Tech stack](#tech-stack)
 2. [Project structure](#project-structure)
@@ -33,9 +50,15 @@ Private identifying details and claim evidence are protected on the backend. The
 12. [Acknowledgements](#acknowledgements)
 13. [Authors](#authors)
 
+<<<<<<< HEAD
 
 
  Tech stack
+=======
+---
+
+## Tech stack
+>>>>>>> fix-login-aaron
 
 | Layer    | Technology                                                                     |
 |----------|--------------------------------------------------------------------------------|
@@ -45,9 +68,15 @@ Private identifying details and claim evidence are protected on the backend. The
 | Security | bcrypt password hashing (`bcryptjs`), JWT sessions, token revocation on logout |
 | Uploads  | Multer (images only, 5 MB limit)                                               |
 
+<<<<<<< HEAD
 Project structure
 
 
+=======
+## Project structure
+
+```
+>>>>>>> fix-login-aaron
 ucu_lost_found_structured/
 ├── backend/
 │   ├── server.js          # Express app and all API routes
@@ -80,7 +109,11 @@ git clone https://github.com/aaronwadeje/ucu_lost_found_structured.git
 cd ucu_lost_found_structured
 ```
 
+<<<<<<< HEAD
  2. Create the database
+=======
+### 2. Create the database
+>>>>>>> fix-login-aaron
 
 From the `backend` folder, run the setup script. This works in Command Prompt, PowerShell and Git Bash:
 
@@ -94,7 +127,11 @@ Enter your MySQL password when asked. This creates the `ucu_lost_found` database
 
 > Prefer a GUI? Open `schema.sql` in MySQL Workbench and run the whole script.
 
+<<<<<<< HEAD
 3. Configure the backend (`.env` file)
+=======
+### 3. Configure the backend (`.env` file)
+>>>>>>> fix-login-aaron
 
 The `.env` file holds your private settings. **It must never be committed to Git.**
 It is already listed in `.gitignore`.
@@ -147,7 +184,11 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 > If `JWT_SECRET` is missing, the server falls back to an insecure development default.
 > Always set your own value.
 
+<<<<<<< HEAD
  4. Install backend dependencies and create the administrator
+=======
+### 4. Install backend dependencies and create the administrator
+>>>>>>> fix-login-aaron
 
 ```bash
 npm install
@@ -163,11 +204,19 @@ Notes:
 - Running the command again for the same email **resets that administrator's password** to the current `ADMIN_PASSWORD`.
 - After the account exists, you can delete the `ADMIN_PASSWORD` line from `.env`. Change your password later from the admin dashboard.
 
+<<<<<<< HEAD
  5. (Optional) Add fictional sample students
 
 bash
 npm run seed
 
+=======
+### 5. (Optional) Add fictional sample students
+
+```bash
+npm run seed
+```
+>>>>>>> fix-login-aaron
 
 This creates two fictional student accounts for testing. The password for both is `password123`.
 
@@ -178,6 +227,7 @@ This creates two fictional student accounts for testing. The password for both i
 
 > Never run `npm run seed` against a production database, and never use `password123` on a deployed system.
 
+<<<<<<< HEAD
 6. Start the backend
 
 bash
@@ -205,24 +255,66 @@ Use the **Admin sign in** page with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you s
 
 
  Administrator accounts
+=======
+### 6. Start the backend
+
+```bash
+npm start
+```
+
+The API runs at **http://localhost:5000**. Keep this terminal open.
+
+### 7. Start the frontend
+
+Open a **second terminal**:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173** in your browser. In development, Vite forwards `/api` and `/uploads` requests to the backend automatically (configured in `vite.config.js`).
+
+### 8. Sign in as the administrator
+
+Use the **Admin sign in** page with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you set in step 3.
+
+---
+
+## Administrator accounts
+>>>>>>> fix-login-aaron
 
 - Public registration **always** creates a **student** account.
 - The **first** administrator is provisioned from the command line (`npm run admin:create`, see [Setup step 4](#4-install-backend-dependencies-and-create-the-administrator)).
 - An existing administrator creates each additional admin from the protected **Administrators** section of the dashboard, giving each their own name, email and unique initial password (minimum 12 characters). Share the initial password securely.
 - Each administrator can update their own name, email and password from the dashboard. Changing profile details requires the current password.
 
+<<<<<<< HEAD
  Production build
 
 bash
 cd frontend
 npm run build
 
+=======
+## Production build
+
+```bash
+cd frontend
+npm run build
+```
+>>>>>>> fix-login-aaron
 
 The build is written to `frontend/dist`. For a deployed build, set `VITE_API_URL` to your backend's public API URL (for example `https://your-backend.example.com/api`) before building. See `frontend/.env.example`.
 
 ---
 
+<<<<<<< HEAD
  How the claim workflow works
+=======
+## How the claim workflow works
+>>>>>>> fix-login-aaron
 
 1. A student reports an item as **lost** or **found**. For found items, private identifying details go in a separate field visible only to the reporter and administrator.
 2. Anyone can search and filter listings by keyword, category, location, date and type. Each listing shows whether it is **open** or **returned**.
@@ -230,19 +322,31 @@ The build is written to `frontend/dist`. For a deployed build, set `VITE_API_URL
 4. The administrator **approves or rejects** the claim and records a reason. Only one claim can be approved per item.
 5. After the owner collects the item, the administrator marks it **returned** (only possible after an approved claim). No further claims are accepted after that.
 
+<<<<<<< HEAD
 Statuses
+=======
+**Statuses**
+>>>>>>> fix-login-aaron
 
 - Item: `open`, `returned`
 - Claim: `pending`, `approved`, `rejected`
 
 ---
 
+<<<<<<< HEAD
  API reference
+=======
+## API reference
+>>>>>>> fix-login-aaron
 
 Protected routes expect `Authorization: Bearer <token>`.
 Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
+<<<<<<< HEAD
 Authentication
+=======
+### Authentication
+>>>>>>> fix-login-aaron
 
 | Method & path             | Access    | Body                      | Returns                           |
 |---------------------------|-----------|---------------------------|-----------------------------------|
@@ -250,7 +354,11 @@ Authentication
 | `POST /api/auth/login`    | Public    | email, password           | `{ token, user }`                 |
 | `POST /api/auth/logout`   | Logged in | –                         | `{ ok:true }` (token is revoked)  |
 
+<<<<<<< HEAD
  Items and claims (students)
+=======
+### Items and claims (students)
+>>>>>>> fix-login-aaron
 
 | Method & path                  | Access    | Body / query                                                                    | Returns                                                                                                                                                      |
 |--------------------------------|-----------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -264,7 +372,11 @@ Authentication
 
 \* Private fields are only returned to the item's owner and administrators.
 
+<<<<<<< HEAD
 Administration (admin only)
+=======
+### Administration (admin only)
+>>>>>>> fix-login-aaron
 
 | Method & path                      | Body                                          | Returns                                                                                                                   |
 |------------------------------------|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
@@ -278,9 +390,15 @@ Administration (admin only)
 | `GET /api/admin/profile`           | –                                             | Current administrator account                                                                                             |
 | `PATCH /api/admin/profile`         | name, email, currentPassword, newPassword?    | Updated current administrator account                                                                                     |
 
+<<<<<<< HEAD
 
 
  Frontend folder map
+=======
+---
+
+## Frontend folder map
+>>>>>>> fix-login-aaron
 
 - `src/api.js` – every call to the backend (one place to change URLs)
 - `src/AuthContext.jsx` – login state, token storage, logout
@@ -288,7 +406,11 @@ Administration (admin only)
 - `src/components/` – Navbar, ItemCard, Field, StatusBadge, Feedback (loading/empty/alerts), ProtectedRoute
 - `src/styles.css` – all styling (mobile first)
 
+<<<<<<< HEAD
 Security notes
+=======
+## Security notes
+>>>>>>> fix-login-aaron
 
 - Passwords are stored only as bcrypt hashes.
 - Permissions are enforced on the backend; hiding buttons or pages in React is only a convenience.
@@ -297,7 +419,11 @@ Security notes
 - Secrets live in `backend/.env`, which is excluded from Git. Never commit it.
 - Never run `npm run seed` or use `password123` on a deployed system.
 
+<<<<<<< HEAD
  Troubleshooting
+=======
+## Troubleshooting
+>>>>>>> fix-login-aaron
 
 | Problem | Fix |
 |---------|-----|
@@ -308,10 +434,18 @@ Security notes
 | Port already in use | Change `PORT` in `backend/.env`, and update the proxy target in `frontend/vite.config.js` to match. |
 | `mysql` is not recognised | Add the MySQL `bin` folder to your PATH, or run `schema.sql` in MySQL Workbench. |
 
+<<<<<<< HEAD
  Acknowledgements
 
 List external code, references and any permitted AI assistance here, as required by the examination instructions.
 
  Authors
+=======
+## Acknowledgements
+
+_List external code, references and any permitted AI assistance here, as required by the examination instructions._
+
+## Authors
+>>>>>>> fix-login-aaron
 
 _Add team members' names and contributions here._
