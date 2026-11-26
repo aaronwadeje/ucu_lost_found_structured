@@ -1,20 +1,20 @@
-# UCU Campus Lost & Found
+UCU Campus Lost & Found
 
 A responsive web application for reporting, searching, and reclaiming lost items on the Uganda Christian University (UCU) campus.  
-Built for **CSC1202 – Web and Mobile Applications Development** (Advent 2026).
+Built for CSC1202 – Web and Mobile Applications Development (Advent 2026).
 
-- **Students** report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
-- **Administrators** review claims, approve or reject them with a reason, confirm when an item has been returned, manage listings, and create other administrator accounts.
+Students report lost or found items, search listings, submit private ownership claims, and track their own reports and claims.
+Administrators review claims, approve or reject them with a reason, confirm when an item has been returned, manage listings, and create other administrator accounts.
 
 Private identifying details and claim evidence are protected **on the backend**. They are never included in public responses.
 
-- **Deployed application:** _add URL here_
-- **Repository:** https://github.com/aaronwadeje/ucu_lost_found_structured
-- **Final commit ID:** _add here before submission_
+- Deployed application: 
+- Repository: https://github.com/aaronwadeje/ucu_lost_found_structured
+- Final commit ID:
 
 ---
 
-## Table of contents
+ Table of contents
 
 1. [Tech stack](#tech-stack)
 2. [Project structure](#project-structure)
@@ -31,9 +31,9 @@ Private identifying details and claim evidence are protected **on the backend**.
 13. [Acknowledgements](#acknowledgements)
 14. [Authors](#authors)
 
----
 
-## Tech stack
+
+Tech stack
 
 | Layer    | Technology                                                                     |
 |----------|--------------------------------------------------------------------------------|
@@ -43,11 +43,10 @@ Private identifying details and claim evidence are protected **on the backend**.
 | Security | bcrypt password hashing (`bcryptjs`), JWT sessions, token revocation on logout |
 | Uploads  | Multer (images only, 5 MB limit)                                               |
 
----
 
-## Project structure
+ Project structure
 
-```text
+text
 ucu_lost_found_structured/
 ├── backend/
 │   ├── server.js          # Express app and all API routes
@@ -61,27 +60,27 @@ ucu_lost_found_structured/
     ├── src/               # React source (pages, components, api.js)
     ├── vite.config.js     # Dev server + proxy to the backend
     └── package.json
-```
+
 
 ---
 
-## Database architecture & file alignment
+ Database architecture & file alignment
 
 The backend database setup files work together to initialize the relational schema and populate initial test accounts so the application can run immediately:
 
-### 1. `backend/schema.sql` (Database Blueprint)
+1. `backend/schema.sql` (Database Blueprint)
 This SQL script defines the core database (`ucu_lost_found`) and establishes the relational rules and constraints between tables:
 - **`users`**: Stores student and administrator accounts. Passwords are stored strictly as secure bcrypt hashes (`VARCHAR(255)`), and `role` (`student` or `admin`) governs backend access permissions.
 - **`items`**: Tracks every lost or found report. It links back to `users` via `reporter_id` and includes a `private_details` column (hidden from public API responses) used to verify true ownership during a claim.
 - **`claims`**: Acts as a bridge between `users` and `items`. When a student claims an item, they submit `evidence`. A `UNIQUE` constraint (`one_claim_per_user` on `item_id, claimant_id`) prevents a user from submitting duplicate claims on the same item.
 - **`revoked_tokens`**: Manages authentication security by blacklisting JWT IDs (`jti`) upon user logout so logged-out tokens cannot be reused.
 
-### 2. `backend/seed.js` (Data Initializer)
+ 2. `backend/seed.js` (Data Initializer)
 Once `schema.sql` creates the empty tables, `seed.js` populates the `users` table with default demo student accounts:
 - **Schema Alignment**: `seed.js` uses `bcryptjs` to hash the default test password (`password123`) before inserting records into the `users` table via the shared database connection pool (`./db.js`).
 - **Idempotency**: Uses `ON DUPLICATE KEY UPDATE`, allowing the seed script to be run multiple times safely without crashing due to duplicate email errors.
 
-### 3. End-to-End Data Lifecycle
+ 3. End-to-End Data Lifecycle
 1. **Initialization**: `schema.sql` builds the empty database tables and enforces foreign key constraints (ensuring an item or claim cannot exist without a valid user).
 2. **Seeding & Provisioning**: `create-admin.js` provisions the initial administrator from `.env`, while `seed.js` optionally injects realistic UCU student accounts for local testing.
 3. **Runtime Flow**:
@@ -91,24 +90,23 @@ Once `schema.sql` creates the empty tables, `seed.js` populates the `users` tabl
 
 ---
 
-## Prerequisites
+Prerequisites
 
 - **Node.js 18 or newer** (check with `node -v`)
 - **MySQL 8** running locally, with a user that can create databases
 - **Git**
 
 ---
+ Setup
 
-## Setup
-
-### 1. Clone the repository
+ 1. Clone the repository
 
 ```bash
 git clone https://github.com/aaronwadeje/ucu_lost_found_structured.git
 cd ucu_lost_found_structured
 ```
 
-### 2. Create the database
+ 2. Create the database
 
 From the `backend` folder, run the setup script. This works in Command Prompt, PowerShell, and Git Bash:
 
@@ -121,7 +119,7 @@ Enter your MySQL password when asked. This creates the `ucu_lost_found` database
 
 > Prefer a GUI? Open `schema.sql` in MySQL Workbench and run the whole script.
 
-### 3. Configure the backend (`.env` file)
+ 3. Configure the backend (`.env` file)
 
 The `.env` file holds your private settings. **It must never be committed to Git.** It is already listed in `.gitignore`.
 
@@ -172,7 +170,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 > If `JWT_SECRET` is missing, the server falls back to an insecure development default. Always set your own value.
 
-### 4. Install backend dependencies and create the administrator
+ 4. Install backend dependencies and create the administrator
 
 ```bash
 npm install
@@ -188,7 +186,7 @@ Notes:
 - Running the command again for the same email **resets that administrator's password** to the current `ADMIN_PASSWORD`.
 - After the account exists, you can delete the `ADMIN_PASSWORD` line from `.env` and change your password later from the admin dashboard.
 
-### 5. (Optional) Add fictional sample students
+ 5. (Optional) Add fictional sample students
 
 ```bash
 npm run seed
@@ -211,7 +209,7 @@ npm start
 
 The API runs at **http://localhost:5000**. Keep this terminal open.
 
-### 7. Start the frontend
+ 7. Start the frontend
 
 Open a **second terminal**:
 
@@ -238,7 +236,7 @@ Use the **Admin sign in** page with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you s
 
 ---
 
-## Production build
+ Production build
 
 ```bash
 cd frontend
@@ -249,7 +247,7 @@ The build is written to `frontend/dist`. For a deployed build, set `VITE_API_URL
 
 ---
 
-## How the claim workflow works
+How the claim workflow works
 
 1. A student reports an item as **lost** or **found**. For found items, private identifying details go in a separate field visible only to the reporter and administrator.
 2. Anyone can search and filter listings by keyword, category, location, date, and type. Each listing shows whether it is **open** or **returned**.
@@ -264,12 +262,12 @@ The build is written to `frontend/dist`. For a deployed build, set `VITE_API_URL
 
 ---
 
-## API reference
+API reference
 
 Protected routes expect `Authorization: Bearer <token>`.  
 Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
-### Authentication
+Authentication
 
 | Method & path             | Access    | Body                      | Returns                           |
 |---------------------------|-----------|---------------------------|-----------------------------------|
@@ -277,7 +275,7 @@ Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 | `POST /api/auth/login`    | Public    | email, password           | `{ token, user }`                 |
 | `POST /api/auth/logout`   | Logged in | –                         | `{ ok:true }` (token is revoked)  |
 
-### Items and claims (students)
+ Items and claims (students)
 
 | Method & path                  | Access         | Body / query                                                                            | Returns                                                                                                                                                      |
 |--------------------------------|----------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -291,7 +289,7 @@ Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
 \* Private fields are only returned to the item's owner and administrators.
 
-### Administration (admin only)
+ administration (admin only)
 
 | Method & path                      | Body                                            | Returns                                                                                                                   |
 |------------------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
@@ -307,7 +305,7 @@ Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
 ---
 
-## Frontend folder map
+Frontend folder map
 
 - `src/api.js` – every call to the backend (one place to change URLs)
 - `src/AuthContext.jsx` – login state, token storage, logout
@@ -317,7 +315,7 @@ Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 
 ---
 
-## Security notes
+ Security notes
 
 - Passwords are stored only as bcrypt hashes.
 - Permissions are enforced on the backend; hiding buttons or pages in React is only a convenience.
@@ -326,25 +324,17 @@ Errors follow the shape `{ "message": "...", "errors": { "field": "..." } }`.
 - Secrets live in `backend/.env`, which is excluded from Git. Never commit it.
 - Never run `npm run seed` or use `password123` on a deployed system.
 
----
 
-## Troubleshooting
+
+ Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
 | `Database initialization failed` | Check `DB_*` values in `backend/.env` and make sure MySQL is running and `schema.sql` was run. |
 | `Access denied for user` | The `DB_USER` / `DB_PASSWORD` in `.env` do not match your MySQL login. |
-| `Set ADMIN_NAME ...` / `ADMIN_PASSWORD must be at least 12 characters` | Fill in all three `ADMIN_*` values correctly in `backend/.env`, then rerun `npm run admin:create`. |
+| `Set ADMIN_NAME ...` / `ADMIN_PASSWORD must be at least 8 characters` | Fill in all three `ADMIN_*` values correctly in `backend/.env`, then rerun `npm run admin:create`. |
 | Frontend loads but shows network errors | Confirm the backend is running on port 5000 (`npm start` in `backend`). |
 | Port already in use | Change `PORT` in `backend/.env`, and update the proxy target in `frontend/vite.config.js` to match. |
 | `mysql` is not recognised | Add the MySQL `bin` folder to your PATH, or run `schema.sql` in MySQL Workbench. |
 
----
 
-## Acknowledgements
-
-_List external code, references and any permitted AI assistance here, as required by the examination instructions._
-
-## Authors
-
-_Add team members' names and contributions here._
