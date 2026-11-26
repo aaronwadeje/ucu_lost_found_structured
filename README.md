@@ -8,7 +8,7 @@ Administrators review claims, approve or reject them with a reason, confirm when
 
 Private identifying details and claim evidence are protected **on the backend**. They are never included in public responses.
 
-- Deployed application: 
+- Deployed application: https://unique-arithmetic-8b778f.netlify.app/
 - Repository: https://github.com/aaronwadeje/ucu_lost_found_structured
 - Final commit ID:b6cfe0f013463bf1ed0a851797033afa4964c72c commit ID
 
