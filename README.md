@@ -41,7 +41,7 @@ Tech stack
 | Backend  | Node.js, Express 4                                                             |
 | Database | MySQL 8                                                                        |
 | Security | bcrypt password hashing (`bcryptjs`), JWT sessions, token revocation on logout |
-| Uploads  | Multer (images only, 5 MB limit)                                               |
+| Uploads  | Multer ,5mb limit and we used some code here                                              |
 
 
  Project structure
